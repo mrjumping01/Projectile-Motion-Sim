@@ -20,7 +20,7 @@ launch_angle:float = radians(55)
 num_pts_to_plot:int = 22
 g:float = 9.81
 
-#elevation = input("What is the elevation of the projectile?")
+# elevation = input("What is the elevation of the projectile?")
 
 # ----------------------------------------------------------------------
 
@@ -69,10 +69,8 @@ df2 = pd.DataFrame({"Instant (s)": time / 2,
 
 df = pd.concat([df, df2], axis=0).sort_values("Instant (s)").reset_index(drop=True)
 
-
 # df = df.sort_values("Instant (s)")
 print(df)
-
 
 # plt.plot(x, y, "ro", linewidth=1)
 # plt.show()
