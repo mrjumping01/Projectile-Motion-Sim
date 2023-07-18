@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 from pylab import plot, show, title, xlabel, ylabel, xlim, ylim, grid
 
 # VARIABLES
-v_0: float = 74
-launch_angle: float = radians(88)
-num_pts_to_plot: int = 22
+v_0: float = float(input('Input launch velocity of projectile (positive): '))
+launch_angle: float = radians(float(input('Input launch angle in degrees: ')))
+num_pts_to_plot: int = int(input('Input number of points to plot (whole number): '))
+initial_height: float = float(input('Input initial height of launch in metres: '))  # Set the initial height here
 g: float = 9.81
-initial_height: float = 0  # Set the initial height here
 
 # CALCULATIONS - ASSUMING NO FRICTION
 time: float = 2 * v_0 * sin(launch_angle) / g
@@ -97,7 +97,7 @@ def on_click(event):
 			angle = atan2(v_y, v_x)
 
 			# Display velocity vector and angle on plot
-			velocity_vector = ax.arrow(point_x, point_y, v_x, v_y, width=0.5, head_width=2, head_length=2, color="blue")
+			velocity_vector = ax.arrow(point_x, point_y, v_x, v_y, width=0.5, head_width=1, head_length=3, color="blue")
 			angle_deg = round(degrees(angle), 2)
 			angle_text = ax.text(point_x + 0.5 * v_x, point_y - 0.5 * v_y, f"{angle_deg}°", color="blue",
 								 fontsize=8)
