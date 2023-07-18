@@ -101,7 +101,6 @@ velocity_vector = None
 angle_text = None
 coord_text = None
 
-
 def on_click(event):
     global velocity_vector, angle_text, coord_text
 
@@ -131,12 +130,12 @@ def on_click(event):
             # Display velocity vector
             dx = velocity * np.cos(angle)
             dy = velocity * np.sin(angle)
-            velocity_vector = ax.arrow(point_x, point_y, dx, dy, width=0.5, head_width=2, head_length=2, color="blue")
+            velocity_vector = ax.arrow(point_x, point_y, dx, dy, width=0.5, head_width=2, head_length=4, color="blue")
             ax.plot([point_x, point_x + dx], [point_y, point_y + dy], "k:", linewidth=0.5)  # Draw dotted line
 
             # Display angle
             angle_deg = degrees(angle)
-            angle_text = ax.text(point_x + dx / 2, point_y + dy / 2, f"{round(angle_deg, 2)}°", color="blue",
+            angle_text = ax.text(point_x + dx / 2, point_y - dy / 2, f"{round(angle_deg, 2)}°", color="blue",
                                  fontsize=8)
 
             # Update the plot
