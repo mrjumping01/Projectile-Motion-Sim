@@ -1,4 +1,4 @@
-from math import sin, radians
+from math import sin, radians, cos
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -53,7 +53,7 @@ if launch_angle == 90: horiz_displacement = 0
 # PLOTTING DATA
 
 x = [ instant * v_0 for instant in evenly_spaced_instants ]
-y = [ (v_0 * (instant) * sin(launch_angle)) - 0.5 * g * (instant)**2 
+y = [ v_0 * instant * sin(launch_angle) - 0.5 * g * instant**2 
 		for instant in evenly_spaced_instants ]
 
 df = pd.DataFrame({'Instant (s)': evenly_spaced_instants,
@@ -75,17 +75,15 @@ print(df)
 # plt.plot(x, y, "ro", linewidth=1)
 # plt.show()
 
+def calculate_instantaneous_velocity(v_0, launch_angle, time):
+    v_x = v_0 * cos(launch_angle)
+    v_y = v_0 * sin(launch_angle) - g * time
+    return v_x, v_y
+
+
 fig, ax = plt.subplots()
 ax.plot(x, y, "ro")
 ax.plot(horiz_displacement / 2, max_height, "+", color="black")
-
-# Plot a vertical line for max height, and add text for it
-ax.axvline(x=horiz_displacement/2, 
-			ymin=min(y), 
-			ymax=max_height, 
-			color="black", 
-			linestyle=":", 
-			linewidth=2)
 
 ax.text(horiz_displacement/2, 
 		 max_height * 1.02, 
