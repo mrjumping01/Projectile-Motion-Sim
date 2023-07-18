@@ -21,7 +21,7 @@ Make sure you have these libraries installed before running the code.
    - `number of points to plot (whole number)`: The number of data points to plot in the motion graph.
    - `initial height of launch in meters`: The initial height of the projectile at launch in meters (m).
    
-2. The program will calculate the trajectory of the projectile assuming no friction. It will display various calculations, such as the maximum height, time of flight, horizontal displacement, and initial velocities.
+2. The program will calculate the trajectory of the projectile assuming no friction. It will display the maximum height attained, time of flight, horizontal displacement, and initial velocity with its components along the x and y axes.
 
 3. A plot will be generated showing the motion of the projectile. The red dots represent the trajectory, and the black plus sign indicates the point of maximum height.
 
