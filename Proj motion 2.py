@@ -1,21 +1,21 @@
 from math import sin, cos, atan2, degrees, radians, sqrt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt, matplotlib.patches as patches
 from pylab import plot, show, title, xlabel, ylabel, xlim, ylim, grid
 
 # VARIABLES
-v_0: float = float(input('Input launch velocity of projectile (positive): '))
-launch_angle: float = radians(float(input('Input launch angle in degrees: ')))
-num_pts_to_plot: int = int(input('Input number of points to plot (whole number): '))
-initial_height: float = float(input('Input initial height of launch in metres: '))  # Set the initial height here
+v_0: float = float(input('Input launch velocity of projectile (positive): ')) # 74
+launch_angle: float = radians(float(input('Input launch angle in degrees: '))) # radians(55)
+num_pts_to_plot: int = int(input('Input number of points to plot (whole number): ')) # 22
+initial_height: float = float(input('Input initial height of launch in metres: '))  # 0
 g: float = 9.81
 
 # CALCULATIONS - ASSUMING NO FRICTION
 time: float = 2 * v_0 * sin(launch_angle) / g
 evenly_spaced_instants = list(np.linspace(0, time, num=num_pts_to_plot, endpoint=True))
 max_height: float = (v_0 * sin(launch_angle)) ** 2 / (2 * g) + initial_height
-horiz_displacement: float = v_0 * cos(launch_angle) * time
+horiz_displacement: float = 0 if round(launch_angle, 2) == 90 else v_0 * cos(launch_angle) * time
 
 # PRINTING CONSTANTS
 print(f"\nCalculations do not account for friction. All values are rounded to 2 decimal places.")
@@ -25,9 +25,6 @@ print(f"Horizontal displacement: {round(horiz_displacement, 2)}m")
 print(f"V_i: {round(v_0, 2)}m/s")
 print(f"Vi_x: {round(v_0 * cos(launch_angle), 2)}m/s")
 print(f"Vi_y: {round(v_0 * sin(launch_angle), 2)}m/s\n----------")
-
-if launch_angle == 90:
-	horiz_displacement = 0
 
 def y_pos(instant):
 	global v_0, launch_angle, g, initial_height
@@ -63,9 +60,10 @@ ax.set_title("Projectile Motion Graph")
 velocity_vector = None
 angle_text = None
 dotted_lines = []  # Store the dotted line objects
+arc = None  # Store the arc object
 
 def on_click(event):
-	global velocity_vector, angle_text, dotted_lines#, coord_text
+	global velocity_vector, angle_text, dotted_lines, arc
 
 	if event.inaxes == ax:
 		idx = np.searchsorted(x, event.xdata)
@@ -81,6 +79,8 @@ def on_click(event):
 				for line in dotted_lines:
 					line.remove()
 				dotted_lines.clear()
+			if arc:
+				arc.remove()
 
 			# Defining v_x and v_y at clicked point
 			v_x = v_0 * cos(launch_angle)
@@ -108,6 +108,17 @@ def on_click(event):
 			dotted_line = ax.plot([point_x - v_x, point_x + v_x], [point_y, point_y], "k:", linewidth=0.5)
 			dotted_lines.append(dotted_line[0])
    
+			# Draw angle arc
+			# LOGIC: 
+			# If angle upwards, then v_y positive, start at 0 and draw angle in trig direction
+			# If angle downwards, v_y negative, start at 360 - abs(angle) (angle negative) and move to 0 in trig direction
+			radius = 0.5 * abs(v_x)
+			start_angle = 0 if v_y >= 0 else 360 - abs(angle_deg)
+			end_angle = start_angle + angle_deg if v_y >= 0 else 0
+			# print(start_angle, end_angle)
+			arc = patches.Arc((point_x, point_y), radius, radius, 0, start_angle, end_angle, color="green")
+			ax.add_patch(arc)
+			
 			# Update the plot
 			plt.draw()
 
