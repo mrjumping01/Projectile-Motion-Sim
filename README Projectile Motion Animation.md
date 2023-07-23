@@ -18,7 +18,6 @@ Make sure you have these libraries installed before running the code.
 1. Launch the program and provide the following input parameters:
    - `launch velocity of projectile (positive)`: The initial velocity of the projectile in meters per second (m/s).
    - `launch angle in degrees`: The launch angle of the projectile in degrees.
-   - `number of points to plot (whole number)`: The number of data points to plot in the motion graph.
    - `initial height of launch in meters`: The initial height of the projectile at launch in meters (m).
    
 2. The program will calculate the trajectory of the projectile assuming no friction. It will display the maximum height attained, time of flight, horizontal displacement, and initial velocity with its components along the x and y axes.
@@ -33,6 +32,10 @@ Make sure you have these libraries installed before running the code.
 
 7. Close the plot window to exit the program.
 
+## Contributing
+
+Contributions to this project are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request on GitHub.
+
 ## Limitations
 
 - The simulation assumes no friction or air resistance, which may not be realistic in practical scenarios.
@@ -43,3 +46,6 @@ Make sure you have these libraries installed before running the code.
 
 This code was developed to provide a basic simulation of projectile motion using Python. It was inspired by the concepts of physics and numerical calculations. Feel free to modify and expand the code according to your specific needs.
 
+----------------------
+
+Feel free to adjust and expand the content of the readme file as needed. The overview, usage, dependencies, and limitations sections provide important information about the code's purpose, how to run it, and its assumptions and limitations. The contributing section invites others to contribute to the project, fostering collaboration and improvement.

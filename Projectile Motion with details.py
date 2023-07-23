@@ -8,18 +8,18 @@ from pylab import plot, show, title, xlabel, ylabel, xlim, ylim, grid
 v_0: float = float(input('Input launch velocity of projectile (positive): ')) # 74
 launch_angle: float = radians(float(input('Input launch angle in degrees: '))) # radians(55)
 num_pts_to_plot: int = int(input('Input number of points to plot (whole number): ')) # 22
-initial_height: float = float(input('Input initial height of launch in metres: '))  # 0
+y_o: float = float(input('Input initial height of launch in metres: '))  # 0
 g: float = 9.81
 
 # CALCULATIONS - ASSUMING NO FRICTION
 time: float = 2 * v_0 * sin(launch_angle) / g
 evenly_spaced_instants = list(np.linspace(0, time, num=num_pts_to_plot, endpoint=True))
-max_height: float = (v_0 * sin(launch_angle)) ** 2 / (2 * g) + initial_height
+y_max: float = (v_0 * sin(launch_angle)) ** 2 / (2 * g) + y_o
 horiz_displacement: float = 0 if round(launch_angle, 2) == 90 else v_0 * cos(launch_angle) * time
 
 # PRINTING CONSTANTS
 print(f"\nCalculations do not account for friction. All values are rounded to 2 decimal places.")
-print(f"----------\nMax height: {round(max_height, 2)}m")
+print(f"----------\nMax height: {round(y_max, 2)}m")
 print(f"Time of flight: {round(time, 2)}s")
 print(f"Horizontal displacement: {round(horiz_displacement, 2)}m")
 print(f"V_i: {round(v_0, 2)}m/s")
@@ -27,34 +27,34 @@ print(f"Vi_x: {round(v_0 * cos(launch_angle), 2)}m/s")
 print(f"Vi_y: {round(v_0 * sin(launch_angle), 2)}m/s\n----------")
 
 def y_pos(instant):
-	global v_0, launch_angle, g, initial_height
-	return v_0 * instant * sin(launch_angle) - 0.5 * g * instant ** 2 + initial_height
+	global v_0, launch_angle, g, y_o
+	return v_0 * instant * sin(launch_angle) - 0.5 * g * instant ** 2 + y_o
 
 # PLOTTING DATA
 x = [ instant * v_0 * cos(launch_angle) for instant in evenly_spaced_instants ]
 y = [ y_pos(instant) for instant in evenly_spaced_instants ]
 
 # All points but the point of max height
-df = pd.DataFrame({'Instant (s)': evenly_spaced_instants,
+data_df = pd.DataFrame({'Instant (s)': evenly_spaced_instants,
 				   'x': x,
 				   'y': y},
 				  dtype="float64")
 
 # Point of max height
-df2 = pd.DataFrame({"Instant (s)": 0.5 * time,
+h_max_point = pd.DataFrame({"Instant (s)": 0.5 * time,
 					"x": 0.5 * horiz_displacement,
-					"y": max_height},
+					"y": y_max},
 				   index=[0],
 				   dtype="float64")
 
-df = pd.concat([df, df2], axis=0).sort_values("Instant (s)").reset_index(drop=True)
+data_df = pd.concat([data_df, h_max_point], axis=0).sort_values("Instant (s)").reset_index(drop=True)
 
 fig, ax = plt.subplots()
 points, = ax.plot(x, y, "ro")
-max_height_point, = ax.plot(0.5 * horiz_displacement, max_height, "+", color="black")
+y_max_point, = ax.plot(0.5 * horiz_displacement, y_max, "+", color="black")
 
 ax.set_xlim(0, 1.1 * horiz_displacement)
-ax.set_ylim(min(initial_height, 0), 1.1 * max_height)
+ax.set_ylim(min(y_o, 0), 1.1 * y_max)
 ax.set_title("Projectile Motion Graph")
 
 velocity_vector = None

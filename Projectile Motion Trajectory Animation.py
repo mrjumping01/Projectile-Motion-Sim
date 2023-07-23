@@ -1,93 +1,129 @@
-from math import sin, cos, atan2, degrees, radians
+from math import sin, cos, atan2, degrees, radians, ceil, sqrt
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from matplotlib.patches import Arrow
 from pylab import plot, show, title, xlabel, ylabel, xlim, ylim, grid
 
 # VARIABLES
-v_0: float = 74
-launch_angle: float = radians(55)
-num_pts_to_plot: int = 50
+v_0: float = float(input('Input launch velocity of projectile (positive): ')) # 74
+launch_angle: float = radians(float(input('Input launch angle in degrees: '))) # radians(55)
+y_o: float = float(input('Input initial height of launch in metres: '))  # 0
 g: float = 9.81
-initial_height: float = 10  # Set the initial height here
 
 # CALCULATIONS
 time: float = 2 * v_0 * sin(launch_angle) / g
+num_pts_to_plot: int = ceil(30*time) # We want animation frame rate of 30 fps
 evenly_spaced_instants = list(np.linspace(0, time, num=num_pts_to_plot, endpoint=True))
-max_height: float = (v_0**2 * sin(launch_angle)**2) / (2 * g) + initial_height
-horiz_displacement: float = v_0 * time
+y_max: float = (v_0* sin(launch_angle)) ** 2 / (2 * g) + y_o
+horiz_displacement: float = 0 if launch_angle == 90 else v_0 * cos(launch_angle) * time 
 
-# PRINTING RESULTS
-print(f"\nAll values are rounded to 2 decimal places.\nMax height: {round(max_height, 2)}m\nTime of flight: {round(time, 2)}s\nHorizontal displacement: {round(horiz_displacement, 2)}m\n")
+# PRINTING CONSTANTS
+print(f"\nCalculations do not account for friction. All values are rounded to 2 decimal places.")
+print(f"----------\nMax height: {round(y_max, 2)}m")
+print(f"Time of flight: {round(time, 2)}s")
+print(f"Horizontal displacement: {round(horiz_displacement, 2)}m")
+print(f"V_i: {round(v_0, 2)}m/s")
+print(f"Vi_x: {round(v_0 * cos(launch_angle), 2)}m/s")
+print(f"Vi_y: {round(v_0 * sin(launch_angle), 2)}m/s\n----------")
 
-if launch_angle == 90:
-    horiz_displacement = 0
+def y_pos(instant):
+	global v_0, launch_angle, g, y_o
+	return v_0 * instant * sin(launch_angle) - 0.5 * g * instant ** 2 + y_o
+
+def calc_v_y(instant):
+	return -g*instant + v_0*sin(launch_angle)
 
 # PLOTTING DATA
-x = [instant * v_0 for instant in evenly_spaced_instants]
-y = [v_0 * instant * sin(launch_angle) - 0.5 * g * instant**2 + initial_height for instant in evenly_spaced_instants]
+x = [ instant * v_0 * cos(launch_angle) for instant in evenly_spaced_instants ]
+y = [ y_pos(instant) for instant in evenly_spaced_instants ]
+vi_x = v_0 * cos(launch_angle)
+# v_x = [ v_0 * cos(launch_angle) ] * num_pts_to_plot
+v_y = [ calc_v_y(instant) for instant in evenly_spaced_instants ]
 
-df = pd.DataFrame({'Instant (s)': evenly_spaced_instants, 'x': x, 'y': y}, dtype="float64")
-df2 = pd.DataFrame({"Instant (s)": time / 2, "x": horiz_displacement / 2, "y": max_height}, index=[0], dtype="float64")
-df = pd.concat([df, df2], axis=0).sort_values("Instant (s)").reset_index(drop=True)
+data_df = pd.DataFrame({'Instant (s)': evenly_spaced_instants, 
+					'x': x, 
+					'y': y,
+	 				# 'v_x': v_x,
+		 			'v_y': v_y}, 
+					dtype="float64")
+
+h_max_point = pd.DataFrame({"Instant (s)": 0.5 * time, 
+					"x": 0.5 * horiz_displacement, 
+					"y": y_max,
+	 				# 'v_x': v_x[0],
+		 			'v_y': 0}, 
+					index=[0], dtype="float64")
+
+data_df = pd.concat([data_df, h_max_point], axis=0).sort_values("Instant (s)").reset_index(drop=True)
+
+# data_df['v'] = sqrt(data_df['v_x']**2 + data_df['v_y']**2)
 
 fig, ax = plt.subplots()
-points, = ax.plot([], [], "ro")
-max_height_point, = ax.plot([], [], "+", color="black")
+points, = ax.plot([], [], "ko") # 'ko' is for black points
+y_max_point, = ax.plot([], [], "+", color="black")
 
 # Draw curved trajectory
 trajectory, = ax.plot([], [], "b--")
 
-# Display coordinates and velocity vector when a point is clicked
-def on_click(event):
-    if event.inaxes == ax:
-        idx = np.searchsorted(x, event.xdata)
-        if idx < len(x):
-            point_x = x[idx]
-            point_y = y[idx]
-
-            # Display coordinates
-            coord_str = f"({round(point_x, 2)}, {round(point_y, 2)})"
-            print(f"Clicked point: {coord_str}")
-            ax.annotate(coord_str, xy=(point_x, point_y), xytext=(point_x + 10, point_y), textcoords="data",
-                        arrowprops=dict(arrowstyle="->"))
-
-            # Calculate velocity vector and angle
-            velocity = v_0 * cos(launch_angle)
-            angle = atan2(point_y - initial_height, point_x)
-
-            # Display velocity vector
-            dx = velocity * np.cos(angle)
-            dy = velocity * np.sin(angle)
-            velocity_vector = ax.arrow(point_x, point_y, dx, dy, width=0.5, head_width=2, head_length=2, color="blue")
-            ax.plot([point_x, point_x + dx], [point_y, point_y + dy], "k:", linewidth=0.5)  # Draw dotted line
-
-            # Display angle
-            angle_deg = degrees(angle)
-            ax.text(point_x + dx / 2, point_y + dy / 2, f"{round(angle_deg, 2)}°", color="blue", fontsize=8)
-
-            # Update the plot
-            fig.canvas.draw()
-
-        else:
-            print("Clicked outside the trajectory.")
-
-
-fig.canvas.mpl_connect("button_press_event", on_click)
-
-
+# Function to update plot during animation
 def update_plot(frame):
-    points.set_data(x[frame], y[frame])
-    max_height_point.set_data(horiz_displacement / 2, max_height)
-    trajectory.set_data(x[:frame], y[:frame])
-    return points, max_height_point, trajectory
+	global ax
+	points.set_data(x[frame], y[frame])
+	y_max_point.set_data(0.5 * horiz_displacement, y_max)
+	trajectory.set_data(x[:frame], y[:frame])
 
+	# Add arrows for horizontal and vertical velocities	
+ 	# Get the current velocities from the data_df DataFrame
+	curr_v_y = data_df['v_y'][frame]
+
+	# Remove previous arrows before adding new ones
+	[ arrow.remove() for arrow in ax.patches ]	
+
+	# Calculate the scaling factors for the lengths and widths of the arrows
+	x_length_scale = vi_x / (1.1*horiz_displacement)
+	y_length_scale = max(v_y) / (1.1*y_max)
+	standardized_length_scale = 0.15
+	width_scale = 1.1*horiz_displacement/10.89
+
+	# Add vectors and vertical and resultant velocities
+	vx_arrow = Arrow(x[frame], 
+					 y[frame],
+					 (vi_x/x_length_scale)*standardized_length_scale,
+					 0,  
+					 width=0.1*width_scale, 
+					 color='blue'
+    )
+	vy_arrow = Arrow(x[frame],# + (vi_x/x_length_scale)*standardized_length_scale, 
+					 y[frame], 
+					 0, 
+					 (curr_v_y/y_length_scale)*standardized_length_scale, 
+					 width=0.25*width_scale, 
+					 color='green'
+    )
+	v_arrow = Arrow(x[frame], 
+					y[frame], 
+					(vi_x/x_length_scale)*standardized_length_scale, 
+					(curr_v_y/y_length_scale)*standardized_length_scale, 
+					width=0.1*width_scale, 
+					color='red'
+    )
+	
+	ax.add_patch(vx_arrow)
+	ax.add_patch(vy_arrow)
+	ax.add_patch(v_arrow)
+
+	return points, y_max_point, trajectory
 
 ax.set_xlim(0, 1.1 * horiz_displacement)
-ax.set_ylim(min(initial_height, 0), 1.1 * max_height)
+ax.set_ylim(min(y_o, 0), 1.1 * y_max)
 ax.set_title("Projectile Motion Graph")
 
-animation = FuncAnimation(fig, update_plot, frames=len(x), interval=200, blit=True)
+# Remember that we want a frame rate of 30fps
+# Blitting is an optimization technique used in animations to only redraw parts of the plot that have changed
+# It can improve performance, however in some cases, it can cause issues with the animation
+# If you don't care about the vector animations, you can set blit to True, especially when time of flight >= 10 secs
+animation = FuncAnimation(fig, update_plot, frames=num_pts_to_plot, interval=num_pts_to_plot/30, blit=False)
 
 plt.show()
